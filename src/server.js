@@ -1,11 +1,11 @@
 const express = require("express")
-const Server = express()
+const server = express()
+const routes = require("./routes")
+
+server.set('view engine', 'ejs')
 
 server.use(express.static("public"))
 
-Server.get('/', (req, res) => {
-    return res.sendFile(__dirname + "/views/index.html")
-})
+server.use(routes)
 
-
-Server.listen(2000, () => console.log('rodando'))
+server.listen(2000, () => console.log('rodando'))
