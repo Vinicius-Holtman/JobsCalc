@@ -18,13 +18,33 @@ const Profile = {
         index(req, res) {
             return res.render(views + "profile", { profile: Profile.data })
         },
-        Update(req, res) {
+        update(req, res) {
             //req.body para pegar os dados
+            const data = req.body
+
             //definir quantas semanas tem em um ano
-            //remover as semanas de ferias do ano
-            //quantas horas por semana trabalhados
+            const weeksPerYear = 52
+
+            //remover as semanas de ferias do ano, para pegar quantas semanas tem em 1 mes
+            const weeksPerMonth = (weeksPerYear - data["vacation-per-year"]) / 12
+
+            //total de horas trabalhadas por semana
+            const weekTotalHours = data["hours-per-day"] * data["days-per-week"]
+
             //total de horas trabalhadas no mes
-        }
+            const monthlyTotalHours = weekTotalHours * weeksPerMonth
+
+            //qual sera o valor da minha hora
+            const valueHour = data["monthly-budget"] / monthlyTotalHours
+
+            Profile.data = {
+                ...Profile.data,
+                ...req.body,
+                "value-hour": valueHour,
+            }
+
+            return res.redirect('/profile')
+        },
     }
 }
 
@@ -79,6 +99,15 @@ const Job = {
 
             return res.redirect('/')
         },
+
+        show(req, res) {
+
+            const jobId = req.params.id
+
+            const job = Job.data.find(job => job.id === jobId)
+
+            return res.render(views + "job-edit", { job })
+        }
     },
     services: {
         remainingDays(job) {
@@ -105,8 +134,8 @@ const Job = {
 routes.get('/', Job.controllers.index)
 routes.get('/job', Job.controllers.create)
 routes.post('/job', Job.controllers.save)
-routes.get('/job/edit', (req, res) => res.render(views + "job-edit"))
+routes.get('/job/:id', Job.controllers.show)
 routes.get('/profile', Profile.controllers.index)
 routes.post('/profile', Profile.controllers.update)
 
-module.exports = routes
+module.exports = routes;
