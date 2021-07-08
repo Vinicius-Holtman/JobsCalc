@@ -9,7 +9,8 @@ const profile = {
     "monthly-budget": 3000,
     "days-per-week": 5,
     "hours-per-day": 5,
-    "vacation-per-year": 4
+    "vacation-per-year": 4,
+    "value-hour": 75,
 }
 
 const jobs = [
@@ -29,19 +30,41 @@ const jobs = [
     },
 ]
 
+function remainingDays(job) {
+    //calculo de tempo restante
+    const remainingDays = (job['total-hours'] / job['daily-hours']).toFixed()
+
+    const createdDate = new Date(job.created_at)
+    const dueDay = createdDate.getDate() + Number(remainingDays)
+    const dueDateInMs = createdDate.setDate(dueDay)
+
+
+
+    const timeDiffInMs = dueDateInMs - Date.now()
+    //transformar millies em dias
+    const dayInMs = 1000 * 60 * 60 * 24
+    const dayDiff = Math.floor(timeDiffInMs / dayInMs)
+
+    //restam X dias
+    return dayDiff
+}
+
+
 routes.get('/', (req, res) => {
 
     const updatedJobs = jobs.map((job) => {
-
-        const remainingDays = (job['total-hours'] / job['daily-hours']).toFixed()
-
-        const createdDate = new Date(job.created_at)
-        const dueDay = createdDate.getDate() + Number(remainingDays)
-        const dueDay = createdDate.setDate()
-        return job
+        const remaining = remainingDays(job)
+        const status = remaining <= 0 ? 'done' : 'progress'
+        
+        return {
+            ...job,
+            remaining,
+            status,
+            budget: profile["value-hour"] * job["total-hours"]
+        }
     })
 
-    return res.render(views + "index", { jobs })
+    return res.render(views + "index", { jobs: updatedJobs })
 })
 routes.get('/job', (req, res) => res.render(views + "job"))
 routes.post('/job', (req, res) => {
