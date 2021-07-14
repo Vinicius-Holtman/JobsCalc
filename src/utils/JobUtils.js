@@ -10,7 +10,7 @@ module.exports = {
         const timeDiffInMs = dueDateInMs - Date.now()
         //transformar millies em dias
         const dayInMs = 1000 * 60 * 60 * 24
-        const dayDiff = Math.floor(timeDiffInMs / dayInMs)
+        const dayDiff = Math.ceil(timeDiffInMs / dayInMs)
     
         //restam X dias
         return dayDiff
